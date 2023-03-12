@@ -89,7 +89,7 @@ jobs:
             - v1-Back-build
             - v1-front-build
 
-    - run:
+      - run:
           name: set eb environment Variables and prepare for deploy
           command: |
             echo "TODO: Deploy App"
