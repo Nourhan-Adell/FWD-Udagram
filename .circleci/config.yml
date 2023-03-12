@@ -90,9 +90,13 @@ jobs:
             - v1-front-build
 
       - run:
-          name: Deploy App
+          name: Deploy App (frontend)
           command: |
             npm run frontend:deploy
+
+      - run:
+          name: Deploy App (Backend)
+          command: |
             npm run backend:deploy
 workflows:
   udagram:
