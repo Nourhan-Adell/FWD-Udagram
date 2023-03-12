@@ -49,7 +49,7 @@ jobs:
           name: API Build
           command: |
             echo "TODO: Build the backend API"
-            npm run backend:build
+            npm run backend:build::local
       - run:
           name: Test Front-End
           command: |
