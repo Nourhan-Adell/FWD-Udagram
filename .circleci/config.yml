@@ -4,44 +4,74 @@ orbs:
   node: circleci/node@5.0.2
   eb: circleci/aws-elastic-beanstalk@2.0.1
   aws-cli: circleci/aws-cli@3.1.1
+
   # different jobs are calles later in the workflows sections
 jobs:
+  #set environment variables
   build:
     docker:
       # the base image can run most needed actions with orbs
-      - image: "cimg/node:14.15"
+      - image: "cimg/node:14.15-browsers"
     steps:
       # install node and checkout code
       - node/install:
           node-version: "v16.0.0"
       - checkout
-      # Use root level package.json to install dependencies in the frontend app
+      # Restore local dependencies from cache
+      - restore_cache:
+          keys:
+            - v1-front-dependencies-{{ checksum "package.json" }}
+            - v1-front-dependencies-
+            - v1-Backend-dependencies-{{ checksum "package.json" }}
+            - v1-Backend-dependencies-
       - run:
           name: Install Front-End Dependencies
           command: |
-
+            echo "NODE --version" 
+            echo $(node --version)
+            echo "NPM --version" 
+            echo $(npm --version)
             npm run frontend:install
-      # TODO: Install dependencies in the the backend API
+      # Install dependencies in the the backend API
       - run:
           name: Install API Dependencies
           command: |
+            echo "TODO: Install dependencies in the the backend API  "
             npm run backend:install
-      # TODO: Lint the frontend
-      - run:
-          name: Front-End Lint
-          command: |
-            npm run frontend:install
-      # TODO: Build the frontend app
+      # Build the frontend app
       - run:
           name: Front-End Build
           command: |
+            echo "TODO: Build the frontend app"
             npm run frontend:build
-      # TODO: Build the backend API
+      # Build the backend API
       - run:
           name: API Build
           command: |
-            npm run backend:build
-  # deploy step will run only after manual approval
+            echo "TODO: Build the backend API"
+            npm run backend:build::local
+
+      - save_cache:
+          key: v1-Back-build
+          paths:
+            - udagram-api/www
+      - save_cache:
+          key: v1-front-build
+          paths:
+            - udagram-frontend/www
+      - save_cache:
+          key: v1-front-dependencies-{{ checksum "package.json" }}
+          paths:
+            - udagram-frontend/node_modules
+      - save_cache:
+          key: v1-Backend-dependencies-{{ checksum "package.json" }}
+          paths:
+            - udagram-api/node_modules
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/udagram-frontend
+            - project/udagram-api
   deploy:
     docker:
       - image: "cimg/base:stable"
@@ -52,24 +82,45 @@ jobs:
       - eb/setup
       - aws-cli/setup
       - checkout
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          keys:
+            - v1-Back-build
+            - v1-front-build
+
       - run:
-          name: Deploy App
-          # TODO: Install, build, deploy in both apps
+          name: set eb environment Variables and prepare for deploy
+          command: |
+            echo "TODO: Deploy App"
+            pip3 install --upgrade awscli
+            echo "TODO: set eb environment Variables"
+            cd ~/project/udagram-api
+            echo ${PORT}
+            eb setenv PORT=$PORT POSTGRES_USERNAME=$POSTGRES_USERNAME POSTGRES_PASSWORD=$POSTGRES_PASSWORD POSTGRES_DB=$POSTGRES_DB POSTGRES_DB_PORT=$POSTGRES_DB_PORT POSTGRES_HOST=$POSTGRES_HOST AWS_REGION=$AWS_REGION AWS_PROFILE=$AWS_PROFILE AWS_BUCKET=$AWS_BUCKET AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID JWT_SECRET=$JWT_SECRET URL=$URL 
+            cd ..
+
+      - run:
+          name: Deploy App (frontend)
           command: |
             npm run frontend:deploy
 
-  workflows:
-    udagram:
-      jobs:
-        - build
-        - hold:
-            filters:
-              branches:
-                only:
-                  - main
-            type: approval
-            requires:
-              - build
-        - deploy:
-            requires:
-              - hold
+      - run:
+          name: Deploy App (Backend)
+          command: |
+            npm run backend:deploy
+workflows:
+  udagram:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - main
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - main
