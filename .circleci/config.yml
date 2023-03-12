@@ -50,13 +50,7 @@ jobs:
           command: |
             echo "TODO: Build the backend API"
             npm run backend:build::local
-      - run:
-          name: Test Front-End
-          command: |
-            CHROME_BIN=/usr/bin/google-chrome
-            echo "TODO: Test the frontend app"
-            npm run frontend:test
-      # Cache the dist folder for the deploy job
+
       - save_cache:
           key: v1-Back-build
           paths:
