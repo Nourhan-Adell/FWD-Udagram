@@ -90,17 +90,6 @@ jobs:
             - v1-front-build
 
       - run:
-          name: set eb environment Variables and prepare for deploy
-          command: |
-            echo "TODO: Deploy App"
-            pip3 install --upgrade awscli
-            echo "TODO: set eb environment Variables"
-            cd ~/udagram/udagram-api
-            echo ${PORT}
-            eb setenv PORT=$PORT POSTGRES_USERNAME=$POSTGRES_USERNAME POSTGRES_PASSWORD=$POSTGRES_PASSWORD POSTGRES_DB=$POSTGRES_DB POSTGRES_DB_PORT=$POSTGRES_DB_PORT POSTGRES_HOST=$POSTGRES_HOST AWS_REGION=$AWS_REGION AWS_PROFILE=$AWS_PROFILE AWS_BUCKET=$AWS_BUCKET AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID JWT_SECRET=$JWT_SECRET URL=$URL 
-            cd ..
-
-      - run:
           name: Deploy App (frontend)
           command: |
             npm run frontend:deploy
